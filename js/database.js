@@ -1,19 +1,3 @@
-var notify = function(str) {
-    var list = document.getElementById('notifications');
-    var point = document.createElement('li');
-    point.innerHTML = str;
-    list.appendChild(point);
-};
-/*
-var DKlass = new Database(
-    {
-        version: "1.0",
-        tables: [["test1", "id PRIMARY KEY, string VARCHAR[256]"],
-                 ["test2", "id PRIMARY KEY, created_at DATETIME"]]
-        version_mismatch: function(version) { ... do schema migration to right version ...}
-        
-    });
-    */
 
 var Database = new Class({
     initialize: function(properties) {
