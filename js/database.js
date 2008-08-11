@@ -57,7 +57,6 @@ var Database = new Class({
         var self = this;
         this.tables.each(
           function(tuple) {
-            console.log("Ridin' dirty!");
             var name = tuple[0]; var tablespec = tuple[1];
             self.db_handle.transaction( 
                 function(tx) {
@@ -106,7 +105,6 @@ var Database = new Class({
           
         this.tables.each( function(x) { 
             self.db_handle.transaction( function(tx) {
-                window.console.log( "Checking " + x[0] );
                 tx.executeSql( "SELECT COUNT(*) FROM " + x[0], [], 
                     function(tx, r) {callback(true)},
                     function(tx, error) {callback(false)})
