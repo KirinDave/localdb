@@ -113,25 +113,4 @@ var Database = new Class({
     }
 });
 
-window.addEvent('domready', function() {
-notify("DOM Ready.")
-if(window.openDatabase) { 
-  notify("DB Support Detected.");
-  try { 
-  USH = new Database({
-    version: "1.0",
-    name: "User Search History",
-    tables: [["SearchQueries", "id INTEGER PRIMARY KEY, string varchar[256], created_at REAL"],
-             ["Hoyisms",       "id INTEGER PRIMARY KEY, string varchar[256], created_at DATETIME"],
-             ["Poi",           "id INTEGER PRIMARY KEY, string varchar[256]"],
-             ["metacake",      "created_at DATETIME"]],
-    failure_handler: function(x) { notify("failure: " + e.message) }
-  });
-  }
-  catch(e) {
-    notify( "Caught error: " + e.message );
-  }
-  
-  notify("USH created. " + USH)
-});
 
