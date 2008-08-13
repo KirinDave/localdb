@@ -22,7 +22,7 @@ var Database = new Class({
     
     
     callSql: function(sql, obj_args, callback) {
-        db_handle.transaction( 
+        this.db_handle.transaction( 
             function(tx) {
                 tx.executeSql(sql, obj_args,
                     function(tx, r) {callback(r)},
@@ -61,11 +61,52 @@ var Database = new Class({
         this.tables.each(
             function(tuple) { 
                 var name = tuple[0];
-                self[name + "z"] = function(conditions, args, callback) {
-                    self.callSQL("SELECT * FROM " + name + " WHERE " + args + ";",
-                                 args,
-                                 callback);
+                var tableFields = tuple[1].split(",")
+                var tableFieldNames = tableFields.map( function(str) {return str.match(/[^, ]+/)[0]} );
+                var numFields = tableFields.length;
+                var valuesString = "(?"
+                for(var ctr = 1 ; ctr < numFields ; ctr += 1) {
+                    valuesString += ",?"
                 }
+                valuesString += ")";
+                var fieldString = "(" + tableFieldNames.join(",") + ")";
+                
+                var queryGenerator = function(verb,tblName,conditions) {
+                    if(conditions) {
+                        return verb + " FROM " + tblName + " WHERE " + conditions;
+                    }
+                    else {
+                        return verb + " FROM " + tblName;
+                    }
+                };
+                var helper_funobj = function() {
+                    if(arguments.length < 1) {
+                        // We can do nothing
+                    }
+                    else if(arguments.length == 1) {
+                        // Just a callback
+                        self.callSql(queryGenerator("SELECT *", name), [], arguments[0]);
+                    }
+                    else if(arguments.length == 2) {
+                        // Simple args and a callback
+                        self.callSql(queryGenerator("SELECT *", name, arguments[0]), [], arguments[1]);
+                    }
+                    else {
+                        self.callSql(queryGenerator("SELECT *", name, arguments[0]), arguments[1], arguments[2]);
+                    }
+                }
+                helper_funobj.remove = function(conditions,objects) { 
+                    self.callSql(queryGenerator("DELETE", name, conditions), (objects || []), function() {});
+                }
+                helper_funobj.insert = function() {
+                    if(arguments.length != numFields) {
+                        throw {name:'Undefined Field Error', message: "You need to provide at least " + numFields + "fields to #insert."}
+                    }
+                    else {
+                        self.callSql("INSERT INTO " +name+ " " + fieldString + " VALUES " + valuesString, arguments, function() {})
+                    }
+                }
+                self[name + "z"] = helper_funobj
             }, this)
     },
     
